@@ -300,6 +300,8 @@ button {
 .piece {
  display:grid;
  gap:4px;
+ padding:14px;
+margin:-14px;
  touch-action:none;
  cursor:grab;
  filter:drop-shadow(0 3px 2px #0005);
@@ -610,7 +612,7 @@ function renderPiece(p,i){
   });
  });
 
- el.addEventListener("pointerdown",startDrag);
+el.addEventListener("pointerdown",startDrag);
  slot.append(el);
 }
 
