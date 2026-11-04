@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#101b18">
 <title>Timber Tiles — Wood Block Puzzle</title>
+ <link rel="icon" type="image/png" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
 
 <style>
 :root {
@@ -82,15 +84,21 @@ button {
 }
 
 .logo {
- width:42px;
- height:42px;
- border-radius:14px;
- background:linear-gradient(145deg,#f4d08b,#b97836);
- display:grid;
- place-items:center;
- color:#4b2b16;
- font-size:23px;
- box-shadow:inset 0 2px 3px #fff8,0 5px 14px #0005;
+  width:42px;
+  height:42px;
+  border-radius:14px;
+  overflow:hidden;
+  display:grid;
+  place-items:center;
+  flex-shrink:0;
+  box-shadow:0 3px 10px #0005;
+}
+
+.logo img {
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
 }
 
 .brandname {
@@ -449,7 +457,7 @@ button {
 
 <header class="top">
  <div class="brand">
-  <div class="logo">✦</div>
+  <div class="logo"><img src="icon.png" alt="Timber Tiles"></div>
   <div>
    <div class="brandname">TIMBER TILES</div>
    <div class="brandtag">WOOD BLOCK PUZZLE</div>
