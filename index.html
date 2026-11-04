@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#101b18">
+<title>Timber Tiles — Wood Block Puzzle</title>
+
+<style>
+:root {
+ --bg:#101b18;
+ --panel:#1a2a25;
+ --gold:#f2bd68;
+ --cream:#f7e5c4;
+ --muted:#a9b8aa;
+ --gap:5px;
+}
+
+* {
+ box-sizing:border-box;
+ -webkit-tap-highlight-color:transparent;
+ user-select:none !important;
+ -webkit-user-select:none !important;
+ -webkit-touch-callout:none !important;
+ caret-color:transparent !important;
+}
+
+html,body,.app,.app * {
+ -webkit-user-select:none !important;
+ user-select:none !important;
+ -webkit-touch-callout:none !important;
+ -webkit-tap-highlight-color:transparent !important;
+}
+
+html,body {
+ margin:0;
+ min-height:100%;
+ background:radial-gradient(ellipse at 50% 0%,#294137 0%,#172821 42%,#0c1512 100%);
+ color:var(--cream);
+ font-family:ui-rounded,"SF Pro Rounded",system-ui,-apple-system,Segoe UI,sans-serif;
+ overscroll-behavior:none;
+}
+
+body {
+ min-height:100svh;
+ display:flex;
+ justify-content:center;
+ overflow:hidden;
+}
+
+button {
+ font:inherit;
+ color:inherit;
+ border:0;
+ cursor:pointer;
+ -webkit-user-select:none;
+ user-select:none;
+}
+
+.app {
+ width:min(100%,480px);
+ min-height:100svh;
+ padding:calc(env(safe-area-inset-top) + 12px) 16px calc(env(safe-area-inset-bottom) + 12px);
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:clamp(10px,2.4vh,20px);
+ position:relative;
+}
+
+.top {
+ width:100%;
+ display:flex;
+ align-items:center;
+ justify-content:space-between;
+}
+
+.brand {
+ display:flex;
+ align-items:center;
+ gap:10px;
+}
+
+.logo {
+ width:42px;
+ height:42px;
+ border-radius:14px;
+ background:linear-gradient(145deg,#f4d08b,#b97836);
+ display:grid;
+ place-items:center;
+ color:#4b2b16;
+ font-size:23px;
+ box-shadow:inset 0 2px 3px #fff8,0 5px 14px #0005;
+}
+
+.brandname {
+ font-size:15px;
+ letter-spacing:1.8px;
+ font-weight:900;
+ color:#f4d7a5;
+}
+
+.brandtag {
+ font-size:9px;
+ letter-spacing:2.3px;
+ color:#9daf9f;
+ margin-top:2px;
+}
+
+.iconbtn {
+ width:42px;
+ height:42px;
+ border-radius:14px;
+ background:linear-gradient(145deg,#2c4539,#1a2b24);
+ border:1px solid #54715d;
+ color:#f1d5a5;
+ font-size:19px;
+ box-shadow:0 5px 12px #0004;
+}
+
+.scorebar {
+ display:flex;
+ gap:10px;
+ width:100%;
+}
+
+.scorecard {
+ flex:1;
+ text-align:center;
+ padding:10px 8px 9px;
+ border-radius:16px;
+ background:linear-gradient(145deg,#294238,#1a2c24);
+ border:1px solid #4b6855;
+ box-shadow:inset 0 1px #ffffff12,0 7px 16px #0003;
+}
+
+.scorecard small {
+ display:block;
+ color:#a9b9a8;
+ font-size:10px;
+ font-weight:800;
+ letter-spacing:1.8px;
+}
+
+.scorecard strong {
+ display:block;
+ font-size:clamp(25px,7vw,32px);
+ line-height:1.1;
+ color:#f7d18b;
+ text-shadow:0 2px 0 #75451f;
+ margin-top:3px;
+ font-variant-numeric:tabular-nums;
+}
+
+.progress {
+ width:100%;
+ height:4px;
+ background:#0d1813;
+ border-radius:9px;
+ overflow:hidden;
+ margin-top:7px;
+}
+
+.progress span {
+ display:block;
+ height:100%;
+ width:0;
+ background:linear-gradient(90deg,#b97938,#f7d18b);
+ transition:width .25s;
+}
+
+.hint {
+ font-size:12px;
+ color:#b8c7b8;
+ letter-spacing:.25px;
+ text-align:center;
+ min-height:16px;
+}
+
+.board-wrap {
+ position:relative;
+ padding:10px;
+ border-radius:19px;
+ background:linear-gradient(145deg,#7b5736,#39271b 48%,#1b211b);
+ box-shadow:0 18px 34px #0008,inset 0 2px 3px #fff4,inset 0 -3px 5px #0009;
+ border:1px solid #a17a4c;
+}
+
+.board {
+ display:grid;
+ grid-template-columns:repeat(8,1fr);
+ gap:var(--gap);
+ width:min(calc(100vw - 54px),390px);
+ aspect-ratio:1;
+ background:#17231d;
+ padding:5px;
+ border-radius:11px;
+ box-shadow:inset 0 3px 9px #000b;
+ touch-action:none;
+}
+
+.cell {
+ border-radius:5px;
+ background:linear-gradient(145deg,#26372d,#1b2922);
+ box-shadow:inset 0 1px 2px #ffffff0c,inset 0 -2px 3px #0005;
+ position:relative;
+ transition:background .1s,transform .1s;
+}
+
+.cell.filled {
+ background:linear-gradient(145deg,#f4d18d 0%,#dba45d 48%,#a9652e 100%);
+ box-shadow:inset 0 2px 2px #fff9,inset 0 -3px 4px #633b1e99,0 1px 2px #0008;
+}
+
+.cell.filled:after {
+ content:"";
+ position:absolute;
+ inset:3px;
+ border:1px solid #fff3;
+ border-radius:3px;
+}
+
+.cell.preview {
+ background:#f5d48caa;
+ outline:2px dashed #fff2;
+ outline-offset:-3px;
+}
+
+.cell.clearing {
+ animation:pop .28s ease forwards;
+}
+
+@keyframes pop {
+ 50% {transform:scale(1.18);filter:brightness(1.8)}
+ 100% {transform:scale(.1);opacity:0}
+}
+
+.combo {
+ position:absolute;
+ inset:0;
+ display:grid;
+ place-items:center;
+ pointer-events:none;
+ font-size:clamp(25px,8vw,38px);
+ font-weight:1000;
+ letter-spacing:2px;
+ color:#ffe3a6;
+ text-shadow:0 4px 0 #79451f,0 0 22px #ffbd57;
+ opacity:0;
+ transform:scale(.6);
+ z-index:4;
+}
+
+.combo.show {
+ animation:combo .8s ease forwards;
+}
+
+@keyframes combo {
+ 15% {opacity:1;transform:scale(1.12)}
+ 70% {opacity:1;transform:scale(1)}
+ 100% {opacity:0;transform:translateY(-30px) scale(.9)}
+}
+
+.tray {
+ width:100%;
+ display:flex;
+ justify-content:space-around;
+ align-items:center;
+ gap:8px;
+ min-height:116px;
+ padding:8px 4px 4px;
+ border-radius:20px;
+ background:linear-gradient(145deg,#1e3329,#14221c);
+ border:1px solid #3e5a48;
+ box-shadow:inset 0 1px #ffffff10,0 8px 18px #0004;
+}
+
+.slot {
+ width:31%;
+ height:100px;
+ display:grid;
+ place-items:center;
+ border-radius:14px;
+ position:relative;
+}
+
+.slot.selected {
+ background:#ffffff0b;
+ outline:1px solid #e5b86b66;
+}
+
+.piece {
+ display:grid;
+ gap:4px;
+ touch-action:none;
+ cursor:grab;
+ filter:drop-shadow(0 3px 2px #0005);
+ transition:transform .12s;
+}
+
+.piece:active {
+ transform:scale(1.04);
+}
+
+.pblock,.empty {
+ width:clamp(18px,5.1vw,23px);
+ height:clamp(18px,5.1vw,23px);
+ border-radius:4px;
+}
+
+.pblock {
+ background:linear-gradient(145deg,#f4d18d,#dba45d 55%,#a9652e);
+ box-shadow:inset 0 1px 2px #fff9,inset 0 -2px 3px #633b1e99;
+}
+
+.bottom {
+ display:flex;
+ width:100%;
+ justify-content:space-between;
+ align-items:center;
+ color:#8fa394;
+ font-size:10px;
+ letter-spacing:1.2px;
+ font-weight:800;
+}
+
+.bottom button {
+ background:none;
+ color:#d7bd91;
+ font-size:11px;
+ letter-spacing:1px;
+ padding:8px;
+}
+
+.dragghost {
+ position:fixed;
+ z-index:20;
+ pointer-events:none;
+ opacity:.95;
+ filter:drop-shadow(0 12px 14px #0009);
+ transform:translate(-50%,-50%);
+}
+
+.overlay {
+ position:fixed;
+ inset:0;
+ background:#07100ddd;
+ backdrop-filter:blur(7px);
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ padding:24px;
+ z-index:50;
+ opacity:0;
+ pointer-events:none;
+ transition:opacity .2s;
+}
+
+.overlay.open {
+ opacity:1;
+ pointer-events:auto;
+}
+
+.dialog {
+ width:min(100%,340px);
+ padding:26px 22px;
+ border-radius:24px;
+ text-align:center;
+ background:linear-gradient(150deg,#294238,#14231c);
+ border:1px solid #6b805f;
+ box-shadow:0 20px 60px #000b;
+}
+
+.dialog .medal {
+ font-size:42px;
+ margin-bottom:8px;
+}
+
+.dialog h2 {
+ margin:0 0 8px;
+ color:#f5cf8c;
+ font-size:27px;
+}
+
+.dialog p {
+ color:#b4c3b4;
+ font-size:13px;
+ line-height:1.5;
+ margin:0 0 18px;
+}
+
+.dialog .result {
+ font-size:38px;
+ font-weight:1000;
+ color:#ffe0a0;
+ margin:12px 0 18px;
+}
+
+.primary {
+ width:100%;
+ padding:14px;
+ border-radius:14px;
+ background:linear-gradient(180deg,#f2c779,#c9873f);
+ color:#402613;
+ font-weight:1000;
+ letter-spacing:1px;
+ box-shadow:0 5px 0 #805024,0 8px 15px #0004;
+}
+
+.secondary {
+ margin-top:12px;
+ background:transparent;
+ color:#c4d0c4;
+ padding:10px;
+ font-size:12px;
+}
+
+.settingrow {
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ padding:13px 2px;
+ border-bottom:1px solid #ffffff18;
+ color:#e9d6b5;
+ font-size:14px;
+}
+
+.toggle {
+ background:#365544;
+ padding:6px 12px;
+ border-radius:20px;
+ color:#f5d28e;
+ font-weight:800;
+}
+
+@media(max-height:700px) {
+ .app {gap:8px}
+ .tray {min-height:96px}
+ .slot {height:88px}
+ .scorecard {padding:7px}
+ .board {width:min(calc(100vw - 54px),min(390px,48vh))}
+}
+</style>
+</head>
+
+<body>
+
+<main class="app">
+
+<header class="top">
+ <div class="brand">
+  <div class="logo">✦</div>
+  <div>
+   <div class="brandname">TIMBER TILES</div>
+   <div class="brandtag">WOOD BLOCK PUZZLE</div>
+  </div>
+ </div>
+ <button class="iconbtn" id="settings">⚙</button>
+</header>
+
+<section class="scorebar">
+ <div class="scorecard">
+  <small>PUAN</small>
+  <strong id="score">0</strong>
+  <div class="progress"><span id="progress"></span></div>
+ </div>
+ <div class="scorecard">
+  <small>EN İYİ</small>
+  <strong id="best">0</strong>
+  <div style="font-size:9px;color:#8fa394;margin-top:6px">KENDİ REKORUN</div>
+ </div>
+</section>
+
+<div class="hint" id="hint">
+ Parçaları tahtaya yerleştir, çizgileri tamamla!
+</div>
+
+<section class="board-wrap">
+ <div class="board" id="board"></div>
+ <div class="combo" id="combo">HARİKA!</div>
+</section>
+
+<section class="tray" id="tray">
+ <div class="slot" data-slot="0"></div>
+ <div class="slot" data-slot="1"></div>
+ <div class="slot" data-slot="2"></div>
+</section>
+
+<footer class="bottom">
+ <span>✦ STRATEJİNİ KONUŞTUR</span>
+ <button id="undo">↶ GERİ AL <span id="undoCount">1</span></button>
+</footer>
+
+</main>
+
+<div class="overlay" id="gameover">
+ <div class="dialog">
+  <div class="medal">🏆</div>
+  <h2>Harika denemeydi!</h2>
+  <p>Tahtada yer kalmadı. Bir sonraki turda rekorunu geçmeye hazır mısın?</p>
+  <div class="result" id="final">0</div>
+  <button class="primary" id="again">YENİDEN OYNA</button>
+ </div>
+</div>
+
+<div class="overlay" id="settingsPanel">
+ <div class="dialog">
+  <div class="medal">🌲</div>
+  <h2>Ayarlar</h2>
+  <div class="settingrow">
+   <span>Ses efektleri</span>
+   <button class="toggle" id="sound">AÇIK</button>
+  </div>
+  <div class="settingrow">
+   <span>Oyunu sıfırla</span>
+   <button class="toggle" id="reset">SIFIRLA</button>
+  </div>
+  <button class="secondary" id="closeSettings">KAPAT</button>
+ </div>
+</div>
+
+<script>
+(()=>{
+"use strict";
+
+const N=8;
+
+const SHAPES=[
+ [[1]],[[1,1]],[[1],[1]],
+ [[1,1,1]],[[1],[1],[1]],
+ [[1,1,1,1]],[[1],[1],[1],[1]],
+ [[1,1],[1,1]],
+ [[1,1,1],[1,1,1],[1,1,1]],
+ [[1,0],[1,1]],[[0,1],[1,1]],
+ [[1,1],[1,0]],[[1,1],[0,1]],
+ [[1,0,0],[1,0,0],[1,1,1]],
+ [[0,0,1],[0,0,1],[1,1,1]],
+ [[1,1,1],[1,0,0],[1,0,0]],
+ [[1,1,1],[0,0,1],[0,0,1]],
+ [[1,1,1],[0,1,0]],
+ [[0,1,0],[1,1,1]],
+ [[1,0,0],[1,1,1]],
+ [[0,0,1],[1,1,1]]
+];
+
+const $=id=>document.getElementById(id);
+
+let grid;
+let score;
+let best=+(localStorage.getItem("timber_best")||0);
+let pieces=[null,null,null];
+let soundOn=true;
+let undoLeft=1;
+let snapshot=null;
+let drag=null;
+
+const board=$("board");
+const slots=[...document.querySelectorAll(".slot")];
+
+$("best").textContent=best;
+
+function newGrid(){
+ return Array.from({length:N},()=>Array(N).fill(0));
+}
+
+function render(){
+ board.innerHTML="";
+
+ for(let r=0;r<N;r++){
+  for(let c=0;c<N;c++){
+   const el=document.createElement("div");
+   el.className="cell"+(grid[r][c]?" filled":"");
+   el.dataset.r=r;
+   el.dataset.c=c;
+   board.append(el);
+  }
+ }
+
+ $("score").textContent=score;
+ $("best").textContent=best;
+ $("progress").style.width=(score%500)/5+"%";
+ $("undoCount").textContent=undoLeft;
+}
+
+function renderPiece(p,i){
+ const slot=slots[i];
+ slot.innerHTML="";
+ slot.classList.remove("selected");
+
+ if(!p)return;
+
+ const el=document.createElement("div");
+ el.className="piece";
+ el.dataset.slot=i;
+ el.style.gridTemplateColumns=`repeat(${p[0].length},var(--piece-cell,22px))`;
+
+ p.forEach(row=>{
+  row.forEach(v=>{
+   const b=document.createElement("div");
+   b.className=v?"pblock":"empty";
+   el.append(b);
+  });
+ });
+
+ el.addEventListener("pointerdown",startDrag);
+ slot.append(el);
+}
+
+function fillTray(){
+ for(let i=0;i<3;i++){
+  pieces[i]=SHAPES[Math.floor(Math.random()*SHAPES.length)];
+  renderPiece(pieces[i],i);
+ }
+ checkOver();
+}
+
+function can(p,r,c){
+ for(let y=0;y<p.length;y++){
+  for(let x=0;x<p[y].length;x++){
+   if(p[y][x]&&(r+y<0||c+x<0||r+y>=N||c+x>=N||grid[r+y][c+x])){
+    return false;
+   }
+  }
+ }
+ return true;
+}
+
+/* PREMIUM TIMBER TILES SOUND ENGINE */
+
+let audioCtx=null;
+let masterGain=null;
+
+function audioReady(){
+ if(!soundOn)return null;
+
+ try{
+  if(!audioCtx){
+   audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+   masterGain=audioCtx.createGain();
+   masterGain.gain.value=.62;
+   masterGain.connect(audioCtx.destination);
+  }
+
+  if(audioCtx.state==="suspended")audioCtx.resume();
+
+  return audioCtx;
+ }catch(e){
+  return null;
+ }
+}
+
+function softTone(freq,when,duration,volume,wave="sine",endFreq=null){
+ const ctx=audioCtx;
+ if(!ctx)return;
+
+ const osc=ctx.createOscillator();
+ const gain=ctx.createGain();
+ const filter=ctx.createBiquadFilter();
+
+ osc.type=wave;
+ osc.frequency.setValueAtTime(freq,when);
+
+ if(endFreq){
+  osc.frequency.exponentialRampToValueAtTime(endFreq,when+duration);
+ }
+
+ filter.type="lowpass";
+ filter.frequency.value=2600;
+
+ gain.gain.setValueAtTime(.0001,when);
+ gain.gain.exponentialRampToValueAtTime(volume,when+.008);
+ gain.gain.exponentialRampToValueAtTime(.0001,when+duration);
+
+ osc.connect(filter);
+ filter.connect(gain);
+ gain.connect(masterGain);
+
+ osc.start(when);
+ osc.stop(when+duration+.02);
+}
+
+function woodClick(when,volume=.035){
+ const ctx=audioCtx;
+ if(!ctx)return;
+
+ const n=Math.floor(ctx.sampleRate*.045);
+ const buffer=ctx.createBuffer(1,n,ctx.sampleRate);
+ const data=buffer.getChannelData(0);
+
+ for(let i=0;i<n;i++){
+  data[i]=(Math.random()*2-1)*Math.pow(1-i/n,3);
+ }
+
+ const src=ctx.createBufferSource();
+ const filter=ctx.createBiquadFilter();
+ const gain=ctx.createGain();
+
+ src.buffer=buffer;
+ filter.type="bandpass";
+ filter.frequency.value=1150;
+ filter.Q.value=.8;
+
+ gain.gain.setValueAtTime(volume,when);
+ gain.gain.exponentialRampToValueAtTime(.0001,when+.04);
+
+ src.connect(filter);
+ filter.connect(gain);
+ gain.connect(masterGain);
+
+ src.start(when);
+}
+
+function playSfx(kind){
+ const ctx=audioReady();
+ if(!ctx)return;
+
+ const t=ctx.currentTime;
+
+ if(kind==="place"){
+  woodClick(t,.045);
+  softTone(205,t,.105,.055,"triangle",128);
+  softTone(410,t+.008,.065,.018,"sine",300);
+ }
+
+ else if(kind==="clear"){
+  woodClick(t,.025);
+
+  [523.25,659.25,783.99].forEach((f,i)=>{
+   softTone(f,t+.035+i*.075,.24,.026,"sine",f*.985);
+   softTone(f*2,t+.04+i*.075,.13,.007,"triangle");
+  });
+ }
+
+ else if(kind==="combo"){
+  woodClick(t,.035);
+
+  [392,523.25,659.25,783.99,1046.5].forEach((f,i)=>{
+   softTone(f,t+i*.065,.31,.032,"sine",f*1.012);
+   softTone(f*1.5,t+i*.065,.18,.006,"triangle");
+  });
+ }
+
+ else if(kind==="button"){
+  softTone(620,t,.055,.018,"sine",520);
+ }
+
+ else if(kind==="gameover"){
+  [392,329.63,261.63].forEach((f,i)=>{
+   softTone(f,t+i*.16,.42,.026,"sine",f*.985);
+  });
+ }
+}
+
+/* GAME LOGIC */
+
+function popCombo(t){
+ $("combo").textContent=t;
+ $("combo").classList.remove("show");
+ void $("combo").offsetWidth;
+ $("combo").classList.add("show");
+}
+
+function place(p,r,c){
+ let count=0;
+
+ for(let y=0;y<p.length;y++){
+  for(let x=0;x<p[y].length;x++){
+   if(p[y][x]){
+    grid[r+y][c+x]=1;
+    count++;
+   }
+  }
+ }
+
+ score+=count*10;
+
+ let rows=[];
+ let cols=[];
+
+ for(let y=0;y<N;y++){
+  if(grid[y].every(Boolean))rows.push(y);
+ }
+
+ for(let x=0;x<N;x++){
+  if(grid.every(row=>row[x]))cols.push(x);
+ }
+
+ const cleared=new Set();
+
+ rows.forEach(y=>{
+  for(let x=0;x<N;x++)cleared.add(y+","+x);
+ });
+
+ cols.forEach(x=>{
+  for(let y=0;y<N;y++)cleared.add(y+","+x);
+ });
+
+ cleared.forEach(k=>{
+  const [y,x]=k.split(",").map(Number);
+  grid[y][x]=0;
+ });
+
+ if(cleared.size){
+  score+=cleared.size*5+(rows.length+cols.length)*75;
+
+  if(rows.length+cols.length>1){
+   popCombo((rows.length+cols.length)+" ÇİZGİ!");
+   playSfx("combo");
+  }else{
+   popCombo("GÜZEL!");
+   playSfx("clear");
+  }
+ }else{
+  playSfx("place");
+ }
+
+ if(score>best){
+  best=score;
+  localStorage.setItem("timber_best",best);
+ }
+
+ render();
+}
+
+/* DRAG AND DROP */
+
+function startDrag(e){
+ e.preventDefault();
+
+ const i=+e.currentTarget.dataset.slot;
+ const p=pieces[i];
+
+ if(!p)return;
+
+ snapshot={
+  grid:grid.map(r=>r.slice()),
+  score,
+  pieces:pieces.map(x=>x&&x.map(r=>r.slice()))
+ };
+
+ const ghost=document.createElement("div");
+ ghost.className="dragghost";
+ ghost.style.display="grid";
+ ghost.style.gap="5px";
+
+ const blockSize=Math.min(34,board.clientWidth/N-4);
+
+ ghost.style.gridTemplateColumns=`repeat(${p[0].length},${blockSize}px)`;
+
+ p.forEach(row=>{
+  row.forEach(v=>{
+   const b=document.createElement("div");
+
+   b.style.width=blockSize+"px";
+   b.style.height=blockSize+"px";
+   b.style.borderRadius="5px";
+
+   if(v)b.className="pblock";
+   else b.style.visibility="hidden";
+
+   ghost.append(b);
+  });
+ });
+
+ document.body.append(ghost);
+
+ drag={i,p,ghost,last:null};
+
+ slots[i].classList.add("selected");
+
+ moveDrag(e.clientX,e.clientY);
+
+ window.addEventListener("pointermove",moveDragEvent,{passive:false});
+ window.addEventListener("pointerup",endDrag,{once:true});
+}
+
+function moveDragEvent(e){
+ e.preventDefault();
+ moveDrag(e.clientX,e.clientY);
+}
+
+function moveDrag(x,y){
+ if(!drag)return;
+
+ drag.ghost.style.left=x+"px";
+ drag.ghost.style.top=(y-90)+"px";
+
+ const rect=board.getBoundingClientRect();
+ const cw=rect.width/N;
+ const ch=rect.height/N;
+
+ const left=x-drag.ghost.offsetWidth/2;
+ const top=y-90-drag.ghost.offsetHeight/2;
+
+ const c=Math.round((left-rect.left)/cw);
+ const r=Math.round((top-rect.top)/ch);
+
+ drag.last={r,c};
+
+ [...board.children].forEach(el=>{
+  el.classList.remove("preview");
+ });
+
+ if(can(drag.p,r,c)){
+  for(let yy=0;yy<drag.p.length;yy++){
+   for(let xx=0;xx<drag.p[yy].length;xx++){
+    if(drag.p[yy][xx]){
+     const cell=board.children[(r+yy)*N+c+xx];
+     if(cell)cell.classList.add("preview");
+    }
+   }
+  }
+ }
+}
+
+function endDrag(){
+ if(!drag)return;
+
+ window.removeEventListener("pointermove",moveDragEvent);
+
+ const {i,p,last,ghost}=drag;
+
+ ghost.remove();
+ drag=null;
+
+ slots[i].classList.remove("selected");
+
+ if(last&&can(p,last.r,last.c)){
+  place(p,last.r,last.c);
+
+  pieces[i]=null;
+  renderPiece(null,i);
+
+  if(pieces.every(x=>!x)){
+   fillTray();
+  }else{
+   checkOver();
+  }
+ }else{
+  render();
+ }
+}
+
+function checkOver(){
+ const possible=pieces.some(p=>
+  p&&Array.from({length:N},(_,r)=>
+   Array.from({length:N},(_,c)=>can(p,r,c))
+  ).some(row=>row.some(Boolean))
+ );
+
+ if(!possible){
+  setTimeout(()=>{
+   $("final").textContent=score;
+   $("gameover").classList.add("open");
+   playSfx("gameover");
+  },350);
+ }
+}
+
+function reset(){
+ grid=newGrid();
+ score=0;
+ pieces=[null,null,null];
+ undoLeft=1;
+ snapshot=null;
+
+ $("gameover").classList.remove("open");
+
+ render();
+ fillTray();
+}
+
+/* BUTTONS */
+
+$("settings").onclick=()=>{
+ $("settingsPanel").classList.add("open");
+ playSfx("button");
+};
+
+$("closeSettings").onclick=()=>{
+ $("settingsPanel").classList.remove("open");
+ playSfx("button");
+};
+
+$("sound").onclick=()=>{
+ soundOn=!soundOn;
+ $("sound").textContent=soundOn?"AÇIK":"KAPALI";
+
+ if(soundOn)playSfx("button");
+};
+
+$("reset").onclick=()=>{
+ reset();
+ $("settingsPanel").classList.remove("open");
+ playSfx("button");
+};
+
+$("again").onclick=()=>{
+ reset();
+ playSfx("button");
+};
+
+$("undo").onclick=()=>{
+ if(!snapshot||!undoLeft)return;
+
+ grid=snapshot.grid.map(r=>r.slice());
+ score=snapshot.score;
+ pieces=snapshot.pieces.map(x=>x&&x.map(r=>r.slice()));
+
+ undoLeft=0;
+ snapshot=null;
+
+ render();
+ pieces.forEach(renderPiece);
+
+ $("hint").textContent="Son hamle geri alındı";
+
+ playSfx("button");
+};
+
+/* IPHONE TEXT SELECTION FIX */
+
+document.addEventListener("selectstart",e=>{
+ e.preventDefault();
+});
+
+document.addEventListener("contextmenu",e=>{
+ e.preventDefault();
+});
+
+document.addEventListener("dragstart",e=>{
+ e.preventDefault();
+});
+
+reset();
+
+})();
+</script>
+
+</body>
+</html>
